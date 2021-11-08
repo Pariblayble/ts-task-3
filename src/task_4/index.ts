@@ -8,18 +8,97 @@
  * LogisticContract - перевозка металла, задержка 6000мс
  */
 import { Currency } from "../task_1";
-import { ISecureVaultRequisites } from "../task_3";
+import { ISecureVaultRequisites, Vault } from "../task_3";
+import { BankController } from "../task_5";
 
-export class SmartContract implements IContract{
+abstract class Contract implements IContract {
+    id: number;
+    state: ContractState;
+    value: Currency;
+    sender: ISecureVaultRequisites;
+    receiver: ISecureVaultRequisites;
+
+    private static idCounter = 0;
+
+    constructor() {
+        this.id = Contract.idCounter++;
+        this.state = ContractState.pending;
+    }
+
+    signAndTransfer(): void {
+        console.log("Начинаем исполнение контракта...");
+        this.state = ContractState.transfer;
+    }
+
+    closeTransfer(): void {
+        console.log("Исполнение контракта успешно завершено!");
+        this.state = ContractState.close;
+    }
+    rejectTransfer(): void {
+        console.log("Отмена исполнения контракта :'(");
+        this.state = ContractState.rejected;
+    }
+}
+
+export class SmartContract extends Contract{
+
+    constructor() {
+        super();
+    }
+
+    signAndTransfer(): void {
+        super.signAndTransfer();
+        const sender: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.sender.id);
+        const receiver: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.receiver.id);
+        setTimeout(() =>{ 
+            try {
+                sender.transfer(this.value, receiver);
+            } catch {
+                super.rejectTransfer();
+                throw Error("Не удалось провести операцию");
+            }
+        }, 3000)
+    }
+}
+
+export class BankingContract extends Contract{
+
+    constructor() {
+        super();
+    }
+
+    signAndTransfer(): void {
+        super.signAndTransfer();
+        const sender: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.sender.id);
+        const receiver: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.receiver.id);
+        try{
+            sender.transfer(this.value, receiver);
+        } catch {
+            super.rejectTransfer();
+            throw Error("Не удалось провести операцию");
+        }  
+    }
 
 }
 
-export class BankingContract implements IContract{
+export class LogisticContract extends Contract{
 
-}
-
-export class LogisticContract implements IContract{
-
+    constructor() {
+        super();
+    }
+    signAndTransfer(): void {
+        super.signAndTransfer();
+        const sender: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.sender.id);
+        const receiver: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.receiver.id);
+        setTimeout(() =>{ 
+            try {
+                sender.transfer(this.value, receiver);
+            } catch {
+                super.rejectTransfer();
+                throw Error("Не удалось провести операцию");
+            }
+        }, 6000)
+    }
 }
 
 
@@ -76,3 +155,4 @@ export enum ContractState{
      */
     rejected
 }
+

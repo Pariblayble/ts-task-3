@@ -8,9 +8,33 @@
  */
 
 export class Currency{
+    public name: string;
+    public value: number;
+    public unit: string;
+    public currencyType: CurrencyType;
 
+    constructor(name: string, value: number, unit: string) {
+        if (name.length === 0) {
+            throw Error('Ожидалось: адекватное имя валюты');
+        }
+        if (value < 0) {
+            throw Error('Минус в количестве - минус твоя валюта');
+        }
+        if (unit.length === 0) {
+            throw Error('Ожидалось: адекватное значние, в котором исчисляется валюта');
+        }
+        this.name = name;
+        this.value = value;
+        this.unit = unit; 
+    }
+
+    protected set type(value: CurrencyType) {
+        this.currencyType = value;
+    }
 }
 
 export enum CurrencyType {
-
+    "Material",
+    "Crypto",
+    "MetallDeposit"
 }
