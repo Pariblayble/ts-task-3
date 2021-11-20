@@ -28,6 +28,14 @@ abstract class Contract implements IContract {
     signAndTransfer(): void {
         console.log("Начинаем исполнение контракта...");
         this.state = ContractState.transfer;
+        const sender: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.sender.id);
+        const receiver: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.receiver.id);
+        try{
+            sender.transfer(this.value, receiver);
+        } catch {
+            this.rejectTransfer();
+            throw Error("Не удалось провести операцию");
+        } 
     }
 
     closeTransfer(): void {
@@ -47,16 +55,8 @@ export class SmartContract extends Contract{
     }
 
     signAndTransfer(): void {
-        super.signAndTransfer();
-        const sender: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.sender.id);
-        const receiver: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.receiver.id);
         setTimeout(() =>{ 
-            try {
-                sender.transfer(this.value, receiver);
-            } catch {
-                super.rejectTransfer();
-                throw Error("Не удалось провести операцию");
-            }
+            super.signAndTransfer()
         }, 3000)
     }
 }
@@ -68,15 +68,7 @@ export class BankingContract extends Contract{
     }
 
     signAndTransfer(): void {
-        super.signAndTransfer();
-        const sender: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.sender.id);
-        const receiver: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.receiver.id);
-        try{
-            sender.transfer(this.value, receiver);
-        } catch {
-            super.rejectTransfer();
-            throw Error("Не удалось провести операцию");
-        }  
+        super.signAndTransfer(); 
     }
 
 }
@@ -87,16 +79,8 @@ export class LogisticContract extends Contract{
         super();
     }
     signAndTransfer(): void {
-        super.signAndTransfer();
-        const sender: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.sender.id);
-        const receiver: Vault = BankController.getInstanse().vaultStore.find(x => x.id === this.receiver.id);
         setTimeout(() =>{ 
-            try {
-                sender.transfer(this.value, receiver);
-            } catch {
-                super.rejectTransfer();
-                throw Error("Не удалось провести операцию");
-            }
+            super.signAndTransfer();
         }, 6000)
     }
 }

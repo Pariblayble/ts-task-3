@@ -46,21 +46,8 @@ export class Vault implements ISecureVaultRequisites{
     }
 
     public transfer(currency: Currency, vault: Vault) {
-        let hasValue = false;
-        this.store.forEach((value) => {
-            if (value.name === currency.name) {
-                if (value.value < currency.value) {
-                    throw Error('Извините, батюшка, у вас недостаточно средств для перевода');
-                } else {
-                    value.value -= currency.value; 
-                    vault.deposit(currency);
-                    hasValue = true;
-                }
-            }
-        })
-        if (!hasValue) {
-            throw Error('Извините, батюшка, такой валютой вы не владеете');
-        }
+        this.withdraw(currency);
+        vault.deposit(currency);
     }
 }
 
